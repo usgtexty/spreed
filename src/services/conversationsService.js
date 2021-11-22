@@ -68,16 +68,17 @@ const searchPossibleConversations = async function({ searchText, token, onlyUser
 	token = token || 'new'
 	onlyUsers = !!onlyUsers
 	const shareTypes = [
-		SHARE.TYPE.USER,
+		SHARE.TYPE.EMAIL,
+		// SHARE.TYPE.USER,
 	]
 
-	if (!onlyUsers) {
-		shareTypes.push(SHARE.TYPE.GROUP)
-		shareTypes.push(SHARE.TYPE.CIRCLE)
-		if (token !== 'new') {
-			shareTypes.push(SHARE.TYPE.EMAIL)
-		}
-	}
+	// if (!onlyUsers) {
+	// 	shareTypes.push(SHARE.TYPE.GROUP)
+	// 	shareTypes.push(SHARE.TYPE.CIRCLE)
+	// 	if (token !== 'new') {
+	// 		shareTypes.push(SHARE.TYPE.EMAIL)
+	// 	}
+	// }
 
 	return axios.get(generateOcsUrl('core/autocomplete/get'), Object.assign(options, {
 		params: {
