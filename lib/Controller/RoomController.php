@@ -1017,7 +1017,7 @@ class RoomController extends AEnvironmentAwareController {
 	 * @param string $source
 	 * @return DataResponse
 	 */
-	public function addParticipantToRoom(string $newParticipant, string $source = 'users'): DataResponse {
+	public function addParticipantToRoom(string $newParticipant, string $source = 'users', string $subject = null, string $body = null): DataResponse {
 		if ($this->room->getType() === Room::ONE_TO_ONE_CALL || $this->room->getObjectType() === 'share:password') {
 			return new DataResponse([], Http::STATUS_BAD_REQUEST);
 		}
@@ -1076,7 +1076,7 @@ class RoomController extends AEnvironmentAwareController {
 
 			$participant = $this->participantService->inviteEmailAddress($this->room, $newParticipant);
 
-			$this->guestManager->sendEmailInvitation($this->room, $participant);
+			$this->guestManager->sendEmailInvitation($this->room, $participant, $subject, $body);
 
 			return new DataResponse($data);
 		} else {
