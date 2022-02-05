@@ -102,7 +102,6 @@ const addParticipant = async function(token, newParticipant, source, subject, bo
 		source,
 		subject,
 		body,
-		
 	})
 	return response
 }
