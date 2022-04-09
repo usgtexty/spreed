@@ -75,6 +75,7 @@ export default {
 	.message-body {
 		width: 100%;
 	}
+
 	.message-body {
 		height: 130px;
 	}
