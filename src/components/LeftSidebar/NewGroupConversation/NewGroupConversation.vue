@@ -74,6 +74,14 @@
 					</template>
 					<!-- Third page -->
 					<template v-if="page === 2">
+						<EmailForm :subject="subject"
+							:body="message"
+							:recipients="selectedParticipants"
+							@handle-subject="handleCustomSubject"
+							@handle-body="handleCustomBody" />
+					</template>
+					<!-- Fourth page -->
+					<template v-if="page === 3">
 						<Confirmation
 							:conversation-name="conversationName"
 							:error="error"
@@ -112,10 +120,23 @@
 					<button
 						v-if="page===1"
 						class="navigation__button navigation__button-right primary"
+						@click="handleCustomizeEmail">
+						{{ t('spreed', 'Customize Email') }}
+					</button>
+					<!-- Third page -->
+					<button
+						v-if="page===2"
+						class="navigation__button navigation__button-left"
+						@click="handleBackParticipants">
+						{{ t('spreed', 'Add participants') }}
+					</button>
+					<button
+						v-if="page===2"
+						class="navigation__button navigation__button-right primary"
 						@click="handleCreateConversation">
 						{{ t('spreed', 'Create conversation') }}
 					</button>
-					<!-- Third page -->
+					<!-- Fourth page -->
 					<button
 						v-if="page===2 && (error || isPublic)"
 						class="navigation__button navigation__button-right primary"
@@ -124,7 +145,7 @@
 					</button>
 				</div>
 			</div>
-		</modal>
+		</Modal>
 	</div>
 </template>
 
@@ -137,6 +158,7 @@ import SetContacts from './SetContacts/SetContacts'
 import SetConversationName from './SetConversationName/SetConversationName'
 import SetConversationType from './SetConversationType/SetConversationType'
 import Confirmation from './Confirmation/Confirmation'
+import EmailForm from './EmailForm'
 import { addParticipant } from '../../../services/participantsService'
 import {
 	createPublicConversation,
@@ -165,6 +187,7 @@ export default {
 		SetConversationName,
 		SetConversationType,
 		Confirmation,
+		EmailForm,
 		PasswordProtect,
 		ListableSettings,
 		Plus,
@@ -188,6 +211,8 @@ export default {
 			password: '',
 			passwordProtect: false,
 			listable: CONVERSATION.LISTABLE.NONE,
+			subject: 'You were invited to a conversation.',
+			message: 'Hey there, \nHere is secure meeting link: __link__ \nSee you in the meeting time. \nThanks!',
 		}
 	},
 
@@ -254,6 +279,8 @@ export default {
 			this.password = ''
 			this.listable = CONVERSATION.LISTABLE.NONE
 			this.$store.dispatch('purgeNewGroupConversationStore')
+			this.subject = 'You were invited to a conversation.'
+			this.message = 'Hey there, \nHere is secure meeting link: __link__ \nSee you in the meeting time. \nThanks!'
 		},
 		/** Switch to page 2 */
 		handleSetConversationName() {
@@ -263,12 +290,18 @@ export default {
 		handleClickBack() {
 			this.page = 0
 		},
+		handleBackParticipants() {
+			this.page = 1
+		},
+		handleCustomizeEmail() {
+			this.page = 2
+		},
 		/**
 		 * Handles the creation of the group conversation, adds the seleced
 		 * participants to it and routes to it
 		 */
 		async handleCreateConversation() {
-			this.page = 2
+			this.page = 3
 
 			// TODO: move all operations to a single store action
 			// and commit + addConversation only once at the very end
@@ -312,7 +345,7 @@ export default {
 
 			for (const participant of this.selectedParticipants) {
 				try {
-					await addParticipant(this.token, participant.id, participant.source)
+					await addParticipant(this.token, participant.id, participant.source, this.subject, this.message)
 				} catch (exception) {
 					console.debug(exception)
 					this.isLoading = false
@@ -371,6 +404,12 @@ export default {
 				this.handleSetConversationName()
 				this.page = 1
 			}
+		},
+		handleCustomSubject(value) {
+			this.subject = value
+		},
+		handleCustomBody(value) {
+			this.message = value
 		},
 	},
 

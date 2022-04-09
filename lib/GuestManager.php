@@ -102,7 +102,7 @@ class GuestManager {
 		}
 	}
 
-	public function sendEmailInvitation(Room $room, Participant $participant): void {
+	public function sendEmailInvitation(Room $room, Participant $participant, string $customSubject = null, string $customBody = null): void {
 		if ($participant->getAttendee()->getActorType() !== Attendee::ACTOR_EMAILS) {
 			throw new \InvalidArgumentException('Cannot send email for non-email participant actor type');
 		}
@@ -135,6 +135,10 @@ class GuestManager {
 			$message->setFrom([Util::getDefaultEmailAddress('no-reply') => $this->defaults->getName()]);
 		}
 
+		if (!empty($customSubject)) {
+			$subject = $customSubject;
+		}
+
 		$template->setSubject($subject);
 		$template->addHeader();
 		$template->addHeading($this->l->t('Conversation invitation'));
@@ -142,6 +146,11 @@ class GuestManager {
 			htmlspecialchars($subject . ' ' . $this->l->t('Click the button below to join.')),
 			$subject
 		);
+
+		if (!empty($customBody)) {
+			$customBody = str_replace('__link__', $link, $customBody);
+			$template->addBodyText($this->l->t(nl2br($customBody)), $customBody);
+		}
 
 		$template->addBodyButton(
 			$this->l->t('Join »%s«', [$room->getDisplayName('')]),
