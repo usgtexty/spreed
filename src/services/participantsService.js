@@ -97,10 +97,12 @@ const leaveConversationSync = function(token) {
  * @param {string} newParticipant the id of the new participant
  * @param {string} source the source Source of the participant as returned by the autocomplete suggestion endpoint (default is users)
  */
-const addParticipant = async function(token, newParticipant, source) {
+const addParticipant = async function(token, newParticipant, source, subject, body) {
 	const response = await axios.post(generateOcsUrl('apps/spreed/api/v4/room/{token}/participants', { token }), {
 		newParticipant,
 		source,
+		subject,
+		body,
 	})
 	return response
 }

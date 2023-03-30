@@ -79,8 +79,8 @@ class Manager {
 	public function getChangelogs(): array {
 		return [
 			$this->l->t(
-				"Welcome to Nextcloud Talk!\n"
-				. 'In this conversation you will be informed about new features available in Nextcloud Talk.'
+				"Welcome to bitnext Talk!\n"
+				. 'In this conversation you will be informed about new features available in bitnext Talk.'
 			),
 			$this->l->t('New in Talk %s', ['6']),
 			$this->l->t('- Microsoft Edge and Safari can now be used to participate in audio and video calls'),

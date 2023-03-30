@@ -72,9 +72,9 @@ const searchListedConversations = async function({ searchText }, options) {
  */
 const searchPossibleConversations = async function({ searchText, token, onlyUsers }, options) {
 	token = token || 'new'
-	onlyUsers = !!onlyUsers
+	onlyUsers = true
 	const shareTypes = [
-		SHARE.TYPE.USER,
+		SHARE.TYPE.EMAIL,
 	]
 
 	if (!onlyUsers) {
