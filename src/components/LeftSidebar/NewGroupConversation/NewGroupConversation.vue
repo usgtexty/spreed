@@ -84,8 +84,16 @@
 					class="new-group-conversation__content"
 					:conversation-name="conversationNameTrimmed" />
 
+        <EmailForm v-if="page === 2"
+          class="new-group-conversation__content"
+          :subject="subject"
+          :body="message"
+          :recipients="selectedParticipants"
+          @handle-subject="handleCustomSubject"
+          @handle-body="handleCustomBody" />
+
 				<!-- Third page -->
-				<div v-else-if="page === 2" class="new-group-conversation__content">
+				<div v-else-if="page === 3" class="new-group-conversation__content">
 					<template v-if="isLoading && !error">
 						<template v-if="!success">
 							<div class="icon-loading confirmation__icon" />
@@ -130,23 +138,29 @@
 					type="primary"
 					:disabled="disabled"
 					class="new-group-conversation__button"
-					@click="handleSetConversationName">
+					@click="handleClickNext">
 					{{ t('spreed', 'Add participants') }}
 				</NcButton>
 				<!-- Second page -->
-				<NcButton v-if="page===1"
+				<NcButton v-if="page===1 || page===2"
 					type="tertiary"
 					@click="handleClickBack">
 					{{ t('spreed', 'Back') }}
 				</NcButton>
-				<NcButton v-if="page===1"
+        <NcButton v-if="page===1"
+          type="primary"
+          class="new-group-customize__button"
+          @click="handleClickNext">
+          {{ t('spreed', 'Customize Email') }}
+        </NcButton>
+				<NcButton v-if="page===2"
 					type="primary"
 					class="new-group-conversation__button"
 					@click="handleCreateConversation">
 					{{ t('spreed', 'Create conversation') }}
 				</NcButton>
 				<!-- Third page -->
-				<NcButton v-if="page===2 && (error || isPublic)"
+				<NcButton v-if="page===3 && (error || isPublic)"
 					ref="closeButton"
 					type="primary"
 					class="new-group-conversation__button"
@@ -172,6 +186,7 @@ import NcTextField from '@nextcloud/vue/dist/Components/NcTextField.js'
 import ConversationAvatarEditor from '../../ConversationSettings/ConversationAvatarEditor.vue'
 import ListableSettings from '../../ConversationSettings/ListableSettings.vue'
 import SetContacts from './SetContacts/SetContacts.vue'
+import EmailForm from "./EmailForm.vue";
 
 import { useIsInCall } from '../../../composables/useIsInCall.js'
 import { CONVERSATION, PRIVACY } from '../../../constants.js'
@@ -208,6 +223,7 @@ export default {
 		NcPasswordField,
 		NcTextField,
 		SetContacts,
+    EmailForm,
 	},
 
 	mixins: [participant],
@@ -230,6 +246,8 @@ export default {
 			passwordProtect: false,
 			listable: CONVERSATION.LISTABLE.NONE,
 			isAvatarEdited: false,
+      subject: 'You were invited to a conversation.',
+      message: 'Hey there, \nHere is secure meeting link: __link__ \nSee you in the meeting time. \nThanks!',
 		}
 	},
 
@@ -331,14 +349,16 @@ export default {
 			this.password = ''
 			this.listable = CONVERSATION.LISTABLE.NONE
 			this.$store.dispatch('purgeNewGroupConversationStore')
+      this.subject = 'You were invited to a conversation.'
+      this.message = 'Hey there, \nHere is secure meeting link: __link__ \nSee you in the meeting time. \nThanks!'
 		},
 		/** Switch to page 2 */
-		handleSetConversationName() {
-			this.page = 1
+		handleClickNext() {
+			this.page = this.page + 1
 		},
 		/** Switch to page 1 from page 2 */
 		handleClickBack() {
-			this.page = 0
+			this.page = this.page > 0 ? this.page - 1 : 0;
 		},
 		/**
 		 * Handles the creation of the group conversation, adds the selected
@@ -381,7 +401,7 @@ export default {
 
 			for (const participant of this.selectedParticipants) {
 				try {
-					await addParticipant(this.newConversation.token, participant.id, participant.source)
+					await addParticipant(this.newConversation.token, participant.id, participant.source, this.subject, this.message)
 				} catch (exception) {
 					console.debug(exception)
 					this.isLoading = false
@@ -460,6 +480,13 @@ export default {
 		onClickCopyLink() {
 			copyConversationLinkToClipboard(this.newConversation.token)
 		},
+
+    handleCustomSubject(value) {
+      this.subject = value
+    },
+    handleCustomBody(value) {
+      this.message = value
+    },
 	},
 
 }
